@@ -1,0 +1,9 @@
+# Environment variables
+.env.example
+
+# Node modules
+node_modules/
+
+# IDE settings
+.vscode/
+.idea/
