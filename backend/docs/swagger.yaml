@@ -1,0 +1,160 @@
+openapi: 3.0.2
+info:
+  title: Games API TARpe22
+  version: 1.0.0
+  description: >-
+    # Games API Tarpe22 Hajusrakenduste näidisrakendus 
+    
+    
+    ### Error handling
+    
+    Errors are presented using the HTTP status codes 400-599. The response include a more detailed
+    explanation about the error in the body.
+    
+    
+    ```
+    
+    {
+      "error": "Cleartext explanation of the error that occurred"
+    }
+    
+    ```
+    
+    
+    ### Generic API errors
+    
+    These error responses can be returned by any of the described endpoints.
+    
+    
+    | HTTP status  |  Description |
+    
+    |---|---|
+    
+    | 400| Bad input parameters or invalid request. More information can be found in the response body.
+    
+    | 401| The consumer does not have access to the requested resource or the provided token is not valid.
+    
+    | 404| The requested resource can not be found or the user does not have access to the resource.
+    
+    | 5XX| A server error has occurred while processing the request.
+paths:
+  /games:
+    summary: Games object
+    get:
+      tags:
+        - GAMES
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameListItem'
+              examples:
+                List of Games:
+                  value:
+                    -
+                      id: 47
+                      name: some text
+                    -
+                      id: 40
+                      name: some text
+          description: Success
+      summary: Get all game names
+  '/games/{id}':
+    summary: Deal with Game object
+    get:
+      tags:
+        - GAMES
+      parameters:
+        -
+          examples:
+            First:
+              value: '1'
+          name: id
+          description: Id of the game being requested
+          schema:
+            type: integer
+          in: path
+          required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+              examples:
+                One Game:
+                  value:
+                    id: 36
+                    name: some text
+                    price: 81
+                Game without price:
+                  value:
+                    id: 61
+                    name: some text
+          description: Success
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                InvalidID:
+                  value:
+                    error: 'ID must be a whole number: ab12'
+          description: |
+            Invalid request path parameter
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                NotFound:
+                  value:
+                    error: Game Not Found!
+          description: Game with given id does not exist
+      summary: Get the game with given id
+components:
+  schemas:
+    Game:
+      title: Root Type for Game
+      description: ''
+      type: object
+      properties:
+        id:
+          format: int32
+          type: integer
+        name:
+          type: string
+        price:
+          format: double
+          type: number
+      example:
+        id: 1
+        name: Witcher 3
+        price: 29.99
+    GameListItem:
+      title: Root Type for GameListItem
+      description: ''
+      type: object
+      properties:
+        id:
+          format: int32
+          type: integer
+        name:
+          type: string
+      example:
+        id: 1
+        name: Minecraft
+    Error:
+      title: Root Type for Error
+      description: ''
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: Error message
