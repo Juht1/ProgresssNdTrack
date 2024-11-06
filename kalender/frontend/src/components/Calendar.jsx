@@ -74,7 +74,7 @@ function Calendar() {
     if (window.confirm("Are you sure you want to delete this event?")) {
       try {
         await fetch(`http://localhost:5000/api/events/${currentEvent.title}`, { method: "DELETE" });
-        fetchEvents(); // Refresh the event list
+        fetchEvents(); 
         resetForm();
       } catch (error) {
         console.error("Error deleting event:", error);

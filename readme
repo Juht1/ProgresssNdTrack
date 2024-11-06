@@ -1,0 +1,10 @@
+ 
+ Frontend
+ npm i @fullcalendar/daygrid @fullcalendar/interaction @fullcalendar/timegrid 
+  npm install --save \                                                           
+  @fullcalendar/core \
+  @fullcalendar/list
+   npm i bootstrap   
+
+   Backend
+    npm i express cors   
