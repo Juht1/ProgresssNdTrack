@@ -1,0 +1,10 @@
+.popoverstyle{
+    z-index: 99999 !important;
+}
+
+a {
+    color: #000;
+    text-decoration: none;
+    font-size: 24px;
+
+}
