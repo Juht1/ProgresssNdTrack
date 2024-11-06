@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction"; // Needed for interactions
+import interactionPlugin from "@fullcalendar/interaction"; 
 import * as bootstrap from "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Calendar.css";
@@ -11,32 +11,42 @@ function Calendar() {
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({ title: "", start: "", color: "#378006" });
   const [showModal, setShowModal] = useState(false);
-  const [editMode, setEditMode] = useState(false); // State for edit mode
-  const [currentEvent, setCurrentEvent] = useState(null); // State to hold the current event being edited
+  const [editMode, setEditMode] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState(null);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/events");
+      const data = await response.json();
+      setEvents(data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
   };
 
-  const addEvent = (e) => {
+  const addEvent = async (e) => {
     e.preventDefault();
     if (newEvent.title && newEvent.start) {
-      if (editMode) {
-        // Update existing event
-        setEvents((prevEvents) =>
-          prevEvents.map((event) =>
-            event.title === currentEvent.title ? { ...event, ...newEvent } : event
-          )
-        );
-      } else {
-        // Add new event
-        setEvents((prevEvents) => [
-          ...prevEvents,
-          { title: newEvent.title, start: newEvent.start, color: newEvent.color || null },
-        ]);
+      try {
+        await fetch("http://localhost:5000/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newEvent),
+        });
+        fetchEvents();
+        resetForm();
+      } catch (error) {
+        console.error("Error adding/updating event:", error);
       }
-      resetForm();
     } else {
       alert("Please fill in all required fields.");
     }
@@ -56,14 +66,19 @@ function Calendar() {
       start: info.event.startStr,
       color: info.event.backgroundColor,
     });
-    setEditMode(true); // Set to edit mode
-    setShowModal(true); // Show modal to edit event
+    setEditMode(true);
+    setShowModal(true);
   };
 
-  const deleteEvent = () => {
+  const deleteEvent = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      setEvents((prevEvents) => prevEvents.filter((event) => event.title !== currentEvent.title));
-      resetForm(); // Reset form after deletion
+      try {
+        await fetch(`http://localhost:5000/api/events/${currentEvent.title}`, { method: "DELETE" });
+        fetchEvents(); // Refresh the event list
+        resetForm();
+      } catch (error) {
+        console.error("Error deleting event:", error);
+      }
     }
   };
 
@@ -80,18 +95,7 @@ function Calendar() {
         }}
         height={"90vh"}
         events={events}
-        eventClick={handleEventClick} // Handle click on events
-        eventDidMount={(info) => {
-          return new bootstrap.Popover(info.el, {
-            title: info.event.title,
-            placement: "auto",
-            trigger: "hover",
-            customClass: "popoverStyle",
-            content:
-              "<p>Tiny box in <strong>Bootstrap</strong>.</p>",
-            html: true,
-          });
-        }}
+        eventClick={handleEventClick}
         customButtons={{
           addEventButton: {
             text: 'Add Event',
@@ -100,7 +104,6 @@ function Calendar() {
         }}
       />
 
-      {/* Modal for adding/updating events */}
       <div className={`modal ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
