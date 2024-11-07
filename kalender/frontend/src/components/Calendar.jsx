@@ -72,15 +72,27 @@ function Calendar() {
 
   const deleteEvent = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      try {
-        await fetch(`http://localhost:5000/api/events/${currentEvent.title}`, { method: "DELETE" });
-        fetchEvents(); 
-        resetForm();
-      } catch (error) {
-        console.error("Error deleting event:", error);
-      }
+        try {
+            const response = await fetch(`http://localhost:5000/events/${currentEvent.title}`, { method: "DELETE" });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert("Event not found.");
+                } else {
+                    alert("Failed to delete event.");
+                }
+                return;
+            }
+
+            fetchEvents(); 
+            resetForm();
+        } catch (error) {
+            console.error("Error deleting event:", error);
+            alert("An error occurred while trying to delete the event.");
+        }
     }
-  };
+};
+
 
   return (
     <div>
