@@ -25,19 +25,50 @@ app.use(cors());
 app.use(bodyParser.json());
 
 async function main() { 
-
-  const event = await prisma.event.create({
-    data: {
-      title: 'TitleTest',
-      start: new Date(),
-      color: '#ffffff'
-    },
-  })
-
   // Start the server
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
+
+  setInterval(async () => {
+    console.log("Sending emails");
+    for (const reminder of (await prisma.reminder.findMany())) {
+      const {title, start} = await prisma.event.findFirst({where: {
+        id: reminder.eventId
+      }});
+
+      const reminderDate = new Date(start);
+      reminderDate.setMinutes(reminderDate.getMinutes() - 1);
+      if (new Date() < reminderDate) {
+        continue;
+      }
+
+      let mailOptions = {
+        from: 'MS_GQ8EIP@trial-pq3enl6ojn8l2vwr.mlsender.net',
+        to: reminder.recipient,
+        subject: title,
+        html: `
+        <h1>Reminder for the "${title}" event at ${start}</h1>
+        <img src='https://www.purina.co.uk/sites/default/files/2020-12/Understanding%20Your%20Cat%27s%20Body%20LanguageTEASER.jpg'>
+        `
+      };
+  
+      await prisma.reminder.delete({
+        where: {
+          id: reminder.id
+        }
+      });
+
+      transporter.sendMail(mailOptions, function(err, info) {
+        if (err) {
+          console.error(err)
+        }
+        else {
+          console.log("email sent: ", mailOptions)
+        }
+      });
+    }
+  }, 30000);
 }
 
 // Get all events
@@ -55,9 +86,10 @@ app.post('/events', async (req, res) => {
     }
   });
 
+  let createdEvent;
   if (existingEvent) {
     // Update existing event
-    await prisma.event.update({
+    createdEvent = await prisma.event.update({
       where: {
         id: existingEvent.id
       },
@@ -68,7 +100,7 @@ app.post('/events', async (req, res) => {
       }
     });
   } else {
-    await prisma.event.create({
+    createdEvent = await prisma.event.create({
       data: {
         title: title,
         start: start,
@@ -78,32 +110,22 @@ app.post('/events', async (req, res) => {
   }
 
   for (const emailRecipient of emailRecipients) {
-    let mailOptions = {
-      from: 'MS_GQ8EIP@trial-pq3enl6ojn8l2vwr.mlsender.net',
-      to: emailRecipient,
-      subject: title,
-      text: `reminder for the "${title}" event at ${start}`
-    };
-
-    transporter.sendMail(mailOptions, function(err, info) {
-      if (err) {
-        console.error(err)
-      }
-      else {
-        console.log("email sent: ", mailOptions)
+    await prisma.reminder.create({
+      data: {
+        recipient: emailRecipient,
+        eventId: createdEvent.id
       }
     })
-
   }
 
   res.status(201).json(await prisma.event.findMany());
 });
 
 // Delete an event by title
-app.delete('/events/:title', async (req, res) => {
-  const { title } = req.params;
+app.delete('/events/:id', async (req, res) => {
+  const { id } = req.params;
   await prisma.event.delete({
-    where: {title: title},
+    where: {id: parseInt(id)},
 })
   res.status(204).send();
 });

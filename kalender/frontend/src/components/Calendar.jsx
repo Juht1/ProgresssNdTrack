@@ -72,9 +72,10 @@ function Calendar() {
   const handleEventClick = (info) => {
     setCurrentEvent(info.event);
     setNewEvent({
+      id: info.event.id,
       title: info.event.title,
-      start: info.event.startStr,
-      color: info.event.backgroundColor,
+      start: info.event.start,
+      color: info.event.color,
     });
     setEditMode(true);
     setShowModal(true);
@@ -83,7 +84,7 @@ function Calendar() {
   const deleteEvent = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
         try {
-            const response = await fetch(`http://localhost:5000/events/${currentEvent.title}`, { method: "DELETE" });
+            const response = await fetch(`http://localhost:5000/events/${currentEvent.id}`, { method: "DELETE" });
 
             if (!response.ok) {
                 if (response.status === 404) {

@@ -20,7 +20,7 @@ model Event {
 
 model Reminder {
   id Int @id @default(autoincrement())
+  recipient String
   event Event @relation(fields: [eventId], references: [id])
   eventId Int
 }
-
