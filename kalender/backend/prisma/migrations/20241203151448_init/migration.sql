@@ -1,0 +1,14 @@
+-- CreateTable
+CREATE TABLE "Event" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "title" TEXT NOT NULL,
+    "start" DATETIME NOT NULL,
+    "color" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Reminder" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "eventId" INTEGER NOT NULL,
+    CONSTRAINT "Reminder_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

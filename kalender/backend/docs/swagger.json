@@ -76,6 +76,10 @@
     }
   },
   "definitions": {
+    "StringDateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
     "Event": {
       "type": "object",
       "properties": {
@@ -83,7 +87,10 @@
           "type": "string"
         },
         "start": {
-          "$ref": "#/definitions/DateTime"
+          "$ref": "#/definitions/StringDateTime"
+        },
+        "color": {
+          "type": "string"
         }
       },
       "required": [

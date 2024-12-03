@@ -13,6 +13,7 @@ function Calendar() {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
+  const [emailRecipients, setEmailRecipients] = useState([]);
 
   useEffect(() => {
     fetchEvents();
@@ -33,8 +34,17 @@ function Calendar() {
     setNewEvent((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEmailRecipientChange = (e) => {
+    if (e.key !== "Enter") return;
+    const { value } = e.target;
+    setEmailRecipients([...emailRecipients, value]);
+    e.target.value = "";
+  };
+
   const addEvent = async (e) => {
     e.preventDefault();
+    newEvent.emailRecipients = emailRecipients;
+
     if (newEvent.title && newEvent.start) {
       try {
         await fetch("http://localhost:5000/events", {
@@ -156,6 +166,16 @@ function Calendar() {
                     name="color"
                     value={newEvent.color}
                     onChange={handleInputChange}
+                    className="form-control"
+                  />
+                </div>
+                <div className="mb-3">
+                  <p>{emailRecipients.map(er => er).join(", ")}</p>
+                  <label className="form-label">Add email recipient</label>
+                  <input
+                    type="text"
+                    name="title"
+                    onKeyDown={handleEmailRecipientChange}
                     className="form-control"
                   />
                 </div>
