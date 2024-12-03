@@ -1,4 +1,18 @@
- 
+Rakenduse installeerimine ja käivitamine.
+
+1. Klooni github repo oma arvutisse kasutades github desktop-i, või omal soovitul viisil
+
+2.Ava terminal
+
+3. Backend-i käivitamiseks ava backend terminal ja sisesta " npm i " ja " npm start"
+
+4. Frontend-i Käivitamiseks ava frontend terminal ja sisesta " npm i " ja " npm start"
+
+Jälgides neid samme, peaks saama rakenduse tööle.
+
+Installeeritud Plugin-ad:
+
+
  Frontend
  npm i @fullcalendar/daygrid @fullcalendar/interaction @fullcalendar/timegrid 
   npm install --save \                                                           
@@ -8,3 +22,4 @@
 
    Backend
     npm i express cors   
+    npm install express-ui-express
