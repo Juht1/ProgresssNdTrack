@@ -32,11 +32,8 @@
       "post": {
         "summary": "Create or update an event",
         "tags": ["Events"],
-        "description": "Creates a new event or updates an existing one based on the title.",
+        "description": "Creates a new event or updates an existing event.",
         "consumes": [
-          "application/json"
-        ],
-        "produces": [
           "application/json"
         ],
         "parameters": [
@@ -125,9 +122,6 @@
               "$ref": "#/definitions/Event"
             }
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "404": {
             "description": "Event not found"
           }
@@ -152,44 +146,16 @@
           },
           "404": {
             "description": "Event not found"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
     },
     "/reminders": {
-      "get": {
-        "summary": "Get all reminders",
-        "tags": ["Reminders"],
-        "description": "Retrieves a list of all reminders.",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of reminders",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Reminder"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      },
       "post": {
-        "summary": "Create a new reminder",
+        "summary": "Add a reminder",
         "tags": ["Reminders"],
-        "description": "Creates a new reminder for an event.",
+        "description": "Creates a reminder for an event.",
         "consumes": [
-          "application/json"
-        ],
-        "produces": [
           "application/json"
         ],
         "parameters": [
@@ -198,7 +164,7 @@
             "name": "reminder",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ReminderInput"
+              "$ref": "#/definitions/Reminder"
             }
           }
         ],
@@ -216,76 +182,6 @@
       }
     },
     "/reminders/{id}": {
-      "get": {
-        "summary": "Get a single reminder by ID",
-        "tags": ["Reminders"],
-        "description": "Retrieves a specific reminder by its ID.",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "description": "ID of the reminder to retrieve"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Reminder found",
-            "schema": {
-              "$ref": "#/definitions/Reminder"
-            }
-          },
-          "404": {
-            "description": "Reminder not found"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update an existing reminder",
-        "tags": ["Reminders"],
-        "description": "Updates an existing reminder by its ID.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "integer",
-            "description": "ID of the reminder to update"
-          },
-          {
-            "in": "body",
-            "name": "reminder",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ReminderInput"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Reminder updated successfully",
-            "schema": {
-              "$ref": "#/definitions/Reminder"
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Reminder not found"
-          }
-        }
-      },
       "delete": {
         "summary": "Delete a reminder by ID",
         "tags": ["Reminders"],
@@ -305,22 +201,12 @@
           },
           "404": {
             "description": "Reminder not found"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
     }
   },
   "definitions": {
-    "StringDateTime": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "EventInput": {
-      "$ref": "#/definitions/Event"
-    },
     "Event": {
       "type": "object",
       "properties": {
@@ -331,20 +217,13 @@
           "type": "string"
         },
         "start": {
-          "$ref": "#/definitions/StringDateTime"
+          "type": "string",
+          "format": "date-time"
         },
         "color": {
           "type": "string"
         }
-      },
-      "required": [
-        "title",
-        "start",
-        "color"
-      ]
-    },
-    "ReminderInput": {
-      "$ref": "#/definitions/Reminder"
+      }
     },
     "Reminder": {
       "type": "object",
@@ -353,17 +232,33 @@
           "type": "integer"
         },
         "recipient": {
-          "type": "string",
-          "format": "email"
+          "type": "string"
         },
         "eventId": {
           "type": "integer"
         }
-      },
-      "required": [
-        "recipient",
-        "eventId"
-      ]
+      }
+    },
+    "EventInput": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "color": {
+          "type": "string"
+        },
+        "emailRecipients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }
