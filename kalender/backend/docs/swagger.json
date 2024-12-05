@@ -151,6 +151,28 @@
       }
     },
     "/reminders": {
+      "get": {
+        "summary": "Get all reminders",
+        "tags": ["Reminders"],
+        "description": "Retrieves a list of all reminders.",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of reminders",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Reminder"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
       "post": {
         "summary": "Add a reminder",
         "tags": ["Reminders"],
@@ -182,6 +204,73 @@
       }
     },
     "/reminders/{id}": {
+      "get": {
+        "summary": "Get a reminder by ID",
+        "tags": ["Reminders"],
+        "description": "Retrieves a specific reminder by its ID.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID of the reminder to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reminder found",
+            "schema": {
+              "$ref": "#/definitions/Reminder"
+            }
+          },
+          "404": {
+            "description": "Reminder not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing reminder",
+        "tags": ["Reminders"],
+        "description": "Updates an existing reminder by its ID.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "ID of the reminder to update"
+          },
+          {
+            "in": "body",
+            "name": "reminder",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Reminder"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reminder updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Reminder"
+            }
+          },
+          "404": {
+            "description": "Reminder not found"
+          }
+        }
+      },
       "delete": {
         "summary": "Delete a reminder by ID",
         "tags": ["Reminders"],

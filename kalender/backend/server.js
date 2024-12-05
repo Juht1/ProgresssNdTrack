@@ -44,7 +44,7 @@ async function main() {
         from: 'MS_GQ8EIP@trial-pq3enl6ojn8l2vwr.mlsender.net',
         to: reminder.recipient,
         subject: title,
-        html: `
+        html: ` 
           <h1>Reminder for the "${title}" event at ${start}</h1>
           <img src='https://www.purina.co.uk/sites/default/files/2020-12/Understanding%20Your%20Cat%27s%20Body%20LanguageTEASER.jpg'>
         `
@@ -52,7 +52,7 @@ async function main() {
 
       await prisma.reminder.delete({ where: { id: reminder.id } });
 
-      transporter.sendMail(mailOptions, function (err, info) {
+      transporter.awsendMail(mailOptions, function (err, info) {
         if (err) {
           console.error(err);
         } else {
@@ -60,7 +60,7 @@ async function main() {
         }
       });
     }
-  }, 30000);
+  }, 3000);
 }
 
 // Get all events
@@ -199,6 +199,60 @@ app.post('/reminders', async (req, res) => {
     });
 
     res.status(201).json(reminder);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all reminders
+app.get('/reminders', async (req, res) => {
+  res.status(200).json(await prisma.reminder.findMany());
+});
+
+// Get a single reminder by ID
+app.get('/reminders/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const reminder = await prisma.reminder.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!reminder) {
+      return res.status(404).json({ message: 'Reminder not found' });
+    }
+
+    res.status(200).json(reminder);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update a reminder by ID (PUT)
+app.put('/reminders/:id', async (req, res) => {
+  const { id } = req.params;
+  const { recipient, eventId } = req.body;
+
+  try {
+    const reminder = await prisma.reminder.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!reminder) {
+      return res.status(404).json({ message: 'Reminder not found' });
+    }
+
+    const updatedReminder = await prisma.reminder.update({
+      where: { id: parseInt(id) },
+      data: {
+        recipient: recipient || reminder.recipient,
+        eventId: eventId || reminder.eventId
+      }
+    });
+
+    res.status(200).json(updatedReminder);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });

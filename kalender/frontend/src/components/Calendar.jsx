@@ -6,7 +6,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import * as bootstrap from "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Calendar.css";
-
 function Calendar() {
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({ title: "", start: "", color: "#378006" });
