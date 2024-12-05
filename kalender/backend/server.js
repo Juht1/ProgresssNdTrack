@@ -2,11 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './docs/swagger.json' assert { type: 'json' }; // Use import with assertion
 import { PrismaClient } from '@prisma/client'
 import nodemailer from "nodemailer";
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const swaggerDocument = require('./docs/swagger.json');
 
 const transporter = nodemailer.createTransport({
   host: "smtp.mailersend.net",
@@ -54,7 +52,7 @@ async function main() {
 
       await prisma.reminder.delete({ where: { id: reminder.id } });
 
-      transporter.sendMail(mailOptions, function (err, info) {
+      transporter.awsendMail(mailOptions, function (err, info) {
         if (err) {
           console.error(err);
         } else {
@@ -62,7 +60,7 @@ async function main() {
         }
       });
     }
-  }, 60000);
+  }, 3000);
 }
 
 // Get all events
@@ -193,16 +191,6 @@ app.post('/reminders', async (req, res) => {
   const { recipient, eventId } = req.body;
 
   try {
-    // Ensure eventId exists before creating reminder
-    const event = await prisma.event.findUnique({
-      where: { id: eventId }
-    });
-
-    if (!event) {
-      return res.status(404).json({ message: 'Event not found' });
-    }
-
-    // Create the reminder without allowing the user to specify `id`
     const reminder = await prisma.reminder.create({
       data: {
         recipient,
@@ -216,7 +204,6 @@ app.post('/reminders', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 // Get all reminders
 app.get('/reminders', async (req, res) => {
@@ -243,12 +230,12 @@ app.get('/reminders/:id', async (req, res) => {
   }
 });
 
-// Delete a reminder by ID (DELETE)
-app.delete('/reminders/:id', async (req, res) => {
+// Update a reminder by ID (PUT)
+app.put('/reminders/:id', async (req, res) => {
   const { id } = req.params;
+  const { recipient, eventId } = req.body;
 
   try {
-    // Check if the reminder exists before attempting to delete
     const reminder = await prisma.reminder.findUnique({
       where: { id: parseInt(id) }
     });
@@ -257,18 +244,20 @@ app.delete('/reminders/:id', async (req, res) => {
       return res.status(404).json({ message: 'Reminder not found' });
     }
 
-    // Delete the reminder if it exists
-    await prisma.reminder.delete({
-      where: { id: parseInt(id) }
+    const updatedReminder = await prisma.reminder.update({
+      where: { id: parseInt(id) },
+      data: {
+        recipient: recipient || reminder.recipient,
+        eventId: eventId || reminder.eventId
+      }
     });
 
-    res.status(204).send(); // No content response after successful deletion
+    res.status(200).json(updatedReminder);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 // Delete a reminder by ID (DELETE)
 app.delete('/reminders/:id', async (req, res) => {

@@ -6,8 +6,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import * as bootstrap from "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Calendar.css";
-
-
 function Calendar() {
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({ title: "", start: "", color: "#378006" });
@@ -28,17 +26,6 @@ function Calendar() {
     } catch (error) {
       console.error("Error fetching events:", error);
     }
-  };
-
-  const formatDateForInput = (date) => {
-    // Convert the date to the format required by datetime-local input
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   const handleInputChange = (e) => {
@@ -79,7 +66,6 @@ function Calendar() {
     setShowModal(false);
     setEditMode(false);
     setCurrentEvent(null);
-    setEmailRecipients([]);
   };
 
   const handleEventClick = (info) => {
@@ -87,8 +73,8 @@ function Calendar() {
     setNewEvent({
       id: info.event.id,
       title: info.event.title,
-      start: formatDateForInput(info.event.start), // Use the new formatting function
-      color: info.event.color || "#378006",
+      start: info.event.start,
+      color: info.event.color,
     });
     setEditMode(true);
     setShowModal(true);
@@ -116,6 +102,7 @@ function Calendar() {
         }
     }
 };
+
 
   return (
     <div>
