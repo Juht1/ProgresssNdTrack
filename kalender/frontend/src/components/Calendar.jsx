@@ -29,6 +29,17 @@ function Calendar() {
     }
   };
 
+  const formatDateForInput = (date) => {
+    // Convert the date to the format required by datetime-local input
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
@@ -67,6 +78,7 @@ function Calendar() {
     setShowModal(false);
     setEditMode(false);
     setCurrentEvent(null);
+    setEmailRecipients([]);
   };
 
   const handleEventClick = (info) => {
@@ -74,8 +86,8 @@ function Calendar() {
     setNewEvent({
       id: info.event.id,
       title: info.event.title,
-      start: info.event.start,
-      color: info.event.color,
+      start: formatDateForInput(info.event.start), // Use the new formatting function
+      color: info.event.color || "#378006",
     });
     setEditMode(true);
     setShowModal(true);
@@ -103,7 +115,6 @@ function Calendar() {
         }
     }
 };
-
 
   return (
     <div>
