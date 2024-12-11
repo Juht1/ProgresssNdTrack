@@ -2,9 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './docs/swagger.json' assert { type: 'json' }; // Use import with assertion
-import { PrismaClient } from '@prisma/client'
-import nodemailer from "nodemailer";
+import fs from 'fs';
+import path from 'path';
+import { PrismaClient } from '@prisma/client';
+import nodemailer from 'nodemailer';
+
+// Read the Swagger JSON manually
+const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve('docs/swagger.json'), 'utf-8'));
+
+// Rest of your code follows...
 
 const transporter = nodemailer.createTransport({
   host: "smtp.mailersend.net",
