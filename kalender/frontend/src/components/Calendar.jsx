@@ -15,17 +15,22 @@ function Calendar() {
   const [currentEvent, setCurrentEvent] = useState(null);
   const [emailRecipients, setEmailRecipients] = useState([]);
 
+  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   useEffect(() => {
     fetchEvents();
   }, []);
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch("http://localhost:5000/events");
+      const response = await fetch(`${BASE_URL}/events`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setEvents(data);
     } catch (error) {
-      console.error("Error fetching events:", error);
+      console.error("Error fetching events:", error.message);
     }
   };
 
@@ -58,15 +63,13 @@ function Calendar() {
     if (newEvent.title && newEvent.start) {
       try {
         if (editMode && currentEvent) {
-          // Update existing event
-          await fetch(`http://localhost:5000/events/${currentEvent.id}`, {
+          await fetch(`${BASE_URL}/events/${currentEvent.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newEvent),
           });
         } else {
-          // Create new event
-          await fetch("http://localhost:5000/events", {
+          await fetch(`${BASE_URL}/events`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newEvent),
@@ -76,7 +79,7 @@ function Calendar() {
         fetchEvents();
         resetForm();
       } catch (error) {
-        console.error("Error adding/updating event:", error);
+        console.error("Error adding/updating event:", error.message);
       }
     } else {
       alert("Please fill in all required fields.");
@@ -105,26 +108,26 @@ function Calendar() {
 
   const deleteEvent = async () => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-        try {
-            const response = await fetch(`http://localhost:5000/events/${currentEvent.id}`, { method: "DELETE" });
+      try {
+        const response = await fetch(`${BASE_URL}/events/${currentEvent.id}`, { method: "DELETE" });
 
-            if (!response.ok) {
-                if (response.status === 404) {
-                    alert("Event not found.");
-                } else {
-                    alert("Failed to delete event.");
-                }
-                return;
-            }
-
-            fetchEvents(); 
-            resetForm();
-        } catch (error) {
-            console.error("Error deleting event:", error);
-            alert("An error occurred while trying to delete the event.");
+        if (!response.ok) {
+          if (response.status === 404) {
+            alert("Event not found.");
+          } else {
+            alert("Failed to delete event.");
+          }
+          return;
         }
+
+        fetchEvents(); 
+        resetForm();
+      } catch (error) {
+        console.error("Error deleting event:", error.message);
+        alert("An error occurred while trying to delete the event.");
+      }
     }
-};
+  };
 
   return (
     <div>
