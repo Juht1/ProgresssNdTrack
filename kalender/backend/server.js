@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
 
 const prisma = new PrismaClient();
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // Swagger UI route
 app.use(cors());
