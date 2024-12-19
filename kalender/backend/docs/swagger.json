@@ -317,9 +317,6 @@
     "Reminder": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
         "recipient": {
           "type": "string"
         },
@@ -340,12 +337,6 @@
         },
         "color": {
           "type": "string"
-        },
-        "emailRecipients": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     }

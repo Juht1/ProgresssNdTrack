@@ -2,9 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './docs/swagger.json' assert { type: 'json' }; // Use import with assertion
 import { PrismaClient } from '@prisma/client'
 import nodemailer from "nodemailer";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const swaggerDocument = require('./docs/swagger.json');
 
 const transporter = nodemailer.createTransport({
   host: "smtp.mailersend.net",
@@ -52,7 +54,7 @@ async function main() {
 
       await prisma.reminder.delete({ where: { id: reminder.id } });
 
-      transporter.awsendMail(mailOptions, function (err, info) {
+      transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
           console.error(err);
         } else {
@@ -60,7 +62,7 @@ async function main() {
         }
       });
     }
-  }, 3000);
+  }, 600000);
 }
 
 // Get all events
@@ -232,10 +234,11 @@ app.get('/reminders/:id', async (req, res) => {
 
 // Update a reminder by ID (PUT)
 app.put('/reminders/:id', async (req, res) => {
-  const { id } = req.params;
-  const { recipient, eventId } = req.body;
+  const { id } = req.params; // Get the original ID from the URL path
+  const { recipient, eventId } = req.body; // Get the updated values (but not the ID)
 
   try {
+    // Find the reminder by its current ID
     const reminder = await prisma.reminder.findUnique({
       where: { id: parseInt(id) }
     });
@@ -244,6 +247,7 @@ app.put('/reminders/:id', async (req, res) => {
       return res.status(404).json({ message: 'Reminder not found' });
     }
 
+    // Update reminder, but do not allow the ID to change
     const updatedReminder = await prisma.reminder.update({
       where: { id: parseInt(id) },
       data: {
@@ -252,12 +256,14 @@ app.put('/reminders/:id', async (req, res) => {
       }
     });
 
-    res.status(200).json(updatedReminder);
+    res.status(200).json(updatedReminder); // Return the updated reminder
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
 
 // Delete a reminder by ID (DELETE)
 app.delete('/reminders/:id', async (req, res) => {
