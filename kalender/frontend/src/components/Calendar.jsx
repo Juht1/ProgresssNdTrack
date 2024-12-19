@@ -58,11 +58,21 @@ function Calendar() {
 
     if (newEvent.title && newEvent.start) {
       try {
-        await fetch("http://localhost:5000/events", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newEvent),
-        });
+        if (editMode && currentEvent) {
+          // Update existing event
+          await fetch(`http://localhost:5000/events/${currentEvent.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newEvent),
+          });
+        } else {
+          // Create new event
+          await fetch("http://localhost:5000/events", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newEvent),
+          });
+        }
         fetchEvents();
         resetForm();
       } catch (error) {
@@ -71,7 +81,7 @@ function Calendar() {
     } else {
       alert("Please fill in all required fields.");
     }
-  };
+  }
 
   const resetForm = () => {
     setNewEvent({ title: "", start: "", color: "#378006" });
