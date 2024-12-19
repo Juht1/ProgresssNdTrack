@@ -7,6 +7,7 @@ import * as bootstrap from "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Calendar.css";
 
+
 function Calendar() {
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({ title: "", start: "", color: "#378006" });
@@ -30,6 +31,7 @@ function Calendar() {
   };
 
   const formatDateForInput = (date) => {
+    // Convert the date to the format required by datetime-local input
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -57,22 +59,11 @@ function Calendar() {
 
     if (newEvent.title && newEvent.start) {
       try {
-        if (editMode && currentEvent) {
-          // Update existing event
-          await fetch(`http://localhost:5000/events/${currentEvent.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newEvent),
-          });
-        } else {
-          // Create new event
-          await fetch("http://localhost:5000/events", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newEvent),
-          });
-        }
-        
+        await fetch("http://localhost:5000/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newEvent),
+        });
         fetchEvents();
         resetForm();
       } catch (error) {
@@ -96,7 +87,7 @@ function Calendar() {
     setNewEvent({
       id: info.event.id,
       title: info.event.title,
-      start: formatDateForInput(info.event.start),
+      start: formatDateForInput(info.event.start), // Use the new formatting function
       color: info.event.color || "#378006",
     });
     setEditMode(true);

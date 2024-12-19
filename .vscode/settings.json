@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/2c9772dc-536a-4af5-a646-f449d9f28841/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/KalenderTest",
+    "appService.deploySubpath": "."
+}
