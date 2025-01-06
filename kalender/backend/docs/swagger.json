@@ -24,15 +24,15 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request"
+          "500": {
+            "description": "Internal server error"
           }
         }
       },
       "post": {
         "summary": "Create or update an event",
         "tags": ["Events"],
-        "description": "Creates a new event or updates an existing event.",
+        "description": "Creates a new event or updates existing event if title matches. Also creates reminders for specified email recipients.",
         "consumes": [
           "application/json"
         ],
@@ -42,26 +42,48 @@
             "name": "event",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/EventInput"
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "emailRecipients": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": ["title", "start"]
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Event created or updated successfully",
+            "description": "Event created/updated successfully",
             "schema": {
-              "$ref": "#/definitions/Event"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Event"
+              }
             }
           },
-          "400": {
-            "description": "Bad Request"
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
     },
     "/events/{id}": {
       "get": {
-        "summary": "Get a single event by ID",
+        "summary": "Get an event by ID",
         "tags": ["Events"],
         "description": "Retrieves a specific event by its ID.",
         "produces": [
@@ -85,6 +107,9 @@
           },
           "404": {
             "description": "Event not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       },
@@ -93,9 +118,6 @@
         "tags": ["Events"],
         "description": "Updates an existing event by its ID.",
         "consumes": [
-          "application/json"
-        ],
-        "produces": [
           "application/json"
         ],
         "parameters": [
@@ -111,7 +133,19 @@
             "name": "event",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/EventInput"
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "color": {
+                  "type": "string"
+                }
+              }
             }
           }
         ],
@@ -124,20 +158,23 @@
           },
           "404": {
             "description": "Event not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       },
       "delete": {
         "summary": "Delete an event by ID",
         "tags": ["Events"],
-        "description": "Deletes an event specified by its ID.",
+        "description": "Deletes an event and its associated reminders by ID.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "ID of the event to delete."
+            "description": "ID of the event to delete"
           }
         ],
         "responses": {
@@ -146,6 +183,9 @@
           },
           "404": {
             "description": "Event not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -168,8 +208,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request"
+          "500": {
+            "description": "Internal server error"
           }
         }
       },
@@ -197,8 +237,8 @@
               "$ref": "#/definitions/Reminder"
             }
           },
-          "400": {
-            "description": "Bad Request"
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -229,6 +269,9 @@
           },
           "404": {
             "description": "Reminder not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       },
@@ -237,9 +280,6 @@
         "tags": ["Reminders"],
         "description": "Updates an existing reminder by its ID.",
         "consumes": [
-          "application/json"
-        ],
-        "produces": [
           "application/json"
         ],
         "parameters": [
@@ -268,6 +308,9 @@
           },
           "404": {
             "description": "Reminder not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       },
@@ -281,7 +324,7 @@
             "in": "path",
             "required": true,
             "type": "integer",
-            "description": "ID of the reminder to delete."
+            "description": "ID of the reminder to delete"
           }
         ],
         "responses": {
@@ -290,6 +333,9 @@
           },
           "404": {
             "description": "Reminder not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -312,7 +358,8 @@
         "color": {
           "type": "string"
         }
-      }
+      },
+      "required": ["title", "start"]
     },
     "Reminder": {
       "type": "object",
@@ -323,22 +370,8 @@
         "eventId": {
           "type": "integer"
         }
-      }
-    },
-    "EventInput": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "start": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "color": {
-          "type": "string"
-        }
-      }
+      },
+      "required": ["recipient", "eventId"]
     }
   }
 }

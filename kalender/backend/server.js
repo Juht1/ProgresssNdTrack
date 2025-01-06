@@ -91,47 +91,55 @@ app.get('/events/:id', async (req, res) => {
 
 // Post an event (Create or Update)
 app.post('/events', async (req, res) => {
-  req.body.start = new Date(req.body.start).toISOString();
-  const { title, start, color, emailRecipients } = req.body;
-  const existingEvent = await prisma.event.findFirst({
-    where: {
-      title: title
-    }
-  });
-
-  let createdEvent;
-  if (existingEvent) {
-    // Update existing event
-    createdEvent = await prisma.event.update({
+  try {
+    req.body.start = new Date(req.body.start).toISOString();
+    const { title, start, color, emailRecipients = [] } = req.body;  // Default to empty array
+    
+    const existingEvent = await prisma.event.findFirst({
       where: {
-        id: existingEvent.id
-      },
-      data: {
-        title: title,
-        start: start,
-        color: color
+        title: title
       }
     });
-  } else {
-    createdEvent = await prisma.event.create({
-      data: {
-        title: title,
-        start: start,
-        color: color
-      }
-    })
-  }
 
-  for (const emailRecipient of emailRecipients) {
-    await prisma.reminder.create({
-      data: {
-        recipient: emailRecipient,
-        eventId: createdEvent.id
-      }
-    })
-  }
+    let createdEvent;
+    if (existingEvent) {
+      createdEvent = await prisma.event.update({
+        where: {
+          id: existingEvent.id
+        },
+        data: {
+          title: title,
+          start: start,
+          color: color
+        }
+      });
+    } else {
+      createdEvent = await prisma.event.create({
+        data: {
+          title: title,
+          start: start,
+          color: color
+        }
+      });
+    }
 
-  res.status(201).json(await prisma.event.findMany());
+    // Only create reminders if emailRecipients is provided and is an array
+    if (Array.isArray(emailRecipients)) {
+      for (const emailRecipient of emailRecipients) {
+        await prisma.reminder.create({
+          data: {
+            recipient: emailRecipient,
+            eventId: createdEvent.id
+          }
+        });
+      }
+    }
+
+    res.status(201).json(await prisma.event.findMany());
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 // Update an event by ID (PUT)
