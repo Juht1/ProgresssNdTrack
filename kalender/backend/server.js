@@ -242,11 +242,11 @@ app.get('/reminders/:id', async (req, res) => {
 
 // Update a reminder by ID (PUT)
 app.put('/reminders/:id', async (req, res) => {
-  const { id } = req.params; // Get the original ID from the URL path
-  const { recipient, eventId } = req.body; // Get the updated values (but not the ID)
+  const { id } = req.params;
+  const { recipient, eventId } = req.body;
 
   try {
-    // Find the reminder by its current ID
+    // First check if the reminder exists
     const reminder = await prisma.reminder.findUnique({
       where: { id: parseInt(id) }
     });
@@ -255,7 +255,18 @@ app.put('/reminders/:id', async (req, res) => {
       return res.status(404).json({ message: 'Reminder not found' });
     }
 
-    // Update reminder, but do not allow the ID to change
+    // If eventId is provided, check if the event exists
+    if (eventId) {
+      const event = await prisma.event.findUnique({
+        where: { id: eventId }
+      });
+
+      if (!event) {
+        return res.status(400).json({ message: 'Event not found' });
+      }
+    }
+
+    // If we get here, both reminder and event (if provided) exist
     const updatedReminder = await prisma.reminder.update({
       where: { id: parseInt(id) },
       data: {
@@ -264,7 +275,7 @@ app.put('/reminders/:id', async (req, res) => {
       }
     });
 
-    res.status(200).json(updatedReminder); // Return the updated reminder
+    res.status(200).json(updatedReminder);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
